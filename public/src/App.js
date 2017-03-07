@@ -9,8 +9,9 @@ class App extends Component {
       <div className="container"> 
         <div className="row">
           <div className="col-xs-12">
-            <Link to='/'>Invoices</Link>
-            <Link to='/create-invoice'>Create invoice</Link>
+            <Link className="btn btn-secondary" to='/'>Invoices</Link>
+            <Link className="btn btn-secondary" to='/create-invoice'>Create invoice</Link>
+            <hr/>
           </div>
         </div>      
         <div className="row">
