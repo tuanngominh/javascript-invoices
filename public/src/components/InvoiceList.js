@@ -1,6 +1,7 @@
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import {fetchInvoices} from '../actions'
+import { Link } from 'react-router'
 
 export class InvoiceList extends Component {
   componentDidMount() {
@@ -24,7 +25,7 @@ export class InvoiceList extends Component {
             }
             { this.props.invoices.map((invoice) => (
                 <tr key={invoice.id}>
-                  <th>{invoice.id}</th><td>{invoice.id}</td>
+                  <th>{invoice.id}</th><td><Link className="btn btn-secondary" to={'invoices/' + invoice.id} title='Edit invoice'>{invoice.id}</Link></td>
                 </tr>
               ))
             }

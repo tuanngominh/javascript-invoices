@@ -2,7 +2,7 @@ import * as types from '../ActionTypes'
 
 const invoices = (state = {}, action) => {
   switch (action.type) {
-    case types.INVOICES_FETCH_LIST:
+    case types.INVOICE_FETCH_LIST:
       if (action.isFetching && action.isFetching === true) {
         return {
           ...state,
@@ -60,7 +60,7 @@ const invoices = (state = {}, action) => {
 
       return state      
 
-    case types.SAVE_INVOICE:
+    case types.INVOICE_SAVE:
       if (action.isFetching && action.isFetching === true) {
         return {
           ...state,
@@ -77,6 +77,26 @@ const invoices = (state = {}, action) => {
       }
 
       return state 
+
+    case types.INVOICE_FETCH:
+      if (action.isFetching && action.isFetching === true) {
+        return {
+          ...state,
+          isFetching: true
+        }
+      }
+
+      if (action.status && action.status === 'success') {
+        return { 
+          ...state,
+          invoiceId: action.payload.id,
+          customerId: action.payload.customer_id,
+          discount: action.payload.discount,
+          isFetching: false
+        }
+      }
+
+      return state       
 
     default :
       return state

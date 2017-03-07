@@ -1,6 +1,6 @@
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
-import {fetchCustomers, fetchProducts, saveInvoice, createCustomer} from '../actions'
+import {fetchCustomers, fetchProducts, saveInvoice, createCustomer, fetchInvoice} from '../actions'
 import CustomerForm from './CustomerForm'
 
 class InvoiceItem extends Component {
@@ -37,6 +37,7 @@ class InvoiceForm extends Component {
       customer: '',
       invoiceItems: [],
       discount: 0,
+      customerId: props.customerId ? props.customerId : '',
       total: 0,
       showAddCustomer: false
     }
@@ -45,23 +46,48 @@ class InvoiceForm extends Component {
   componentDidMount() {
     this.props.onFetchCustomers()
     this.props.onFetchProducts()
-    this.handleSaveInvoice()
+    let invoiceId
+    if (this.props.params && this.props.params.invoiceId) {
+      invoiceId = this.props.params.invoiceId
+    } else if (this.props.invoiceId) {
+      invoiceId = this.props.invoiceId
+    }
+    if (invoiceId) {
+      this.props.onFetchInvoice(invoiceId)
+    } else {
+      this.handleSaveInvoice()  
+    }
   }
 
-  handleSaveInvoice = () => {
-    this.props.onSaveInvoice({
+  componentWillReceiveProps(nextProps) {
+    if ('customerId' in nextProps) {
+      this.setState({
+        customerId: nextProps.customerId
+      })
+    }
+    if ('discount' in nextProps) {
+      this.setState({
+        discount: nextProps.discount
+      })
+    }
+  }
+  
+  handleSaveInvoice = (data) => {
+    this.props.onSaveInvoice(Object.assign({
       invoiceId: this.props.invoiceId,
       discount: this.state.discount,
-      customer: this.state.customer
-    })
+      customerId: this.state.customerId
+    }, data))
   }
 
   handleChangeCustomer = (e) => {
     e.preventDefault()
     this.setState({
-      customer: e.target.value
+      customerId: e.target.value
     })
-    this.handleSaveInvoice()
+    this.handleSaveInvoice({
+      customerId: e.target.value
+    })
   }
 
   handleSelectProduct = (e) => {
@@ -123,7 +149,7 @@ class InvoiceForm extends Component {
       discount,
       total: this.total(this.state.products, discount)
     })
-    this.handleSaveInvoice()
+    this.handleSaveInvoice({discount})
   }
 
   toggleAddCustomer = () => {
@@ -147,7 +173,7 @@ class InvoiceForm extends Component {
           <div className="form-group">
             <label className="col-sm-2 control-label">Customer</label>
             <div className="col-sm-8">
-              <select className="form-control" value={this.state.customer} onChange={this.handleChangeCustomer}>
+              <select className="form-control" value={this.state.customerId} onChange={this.handleChangeCustomer}>
                 {this.props.customers.map((customer) => (
                   <option key={customer.id} value={customer.id}>{customer.name}</option>
                 ))}
@@ -229,6 +255,9 @@ const mapDispatchToProps = (dispatch) => {
     },
     onCreateCustomer: (customerName) => {
       dispatch(createCustomer(customerName))
+    },
+    onFetchInvoice: (invoiceId) => {
+      dispatch(fetchInvoice(invoiceId))
     }
   }
 }
@@ -238,6 +267,8 @@ const mapStateToProps = (state) => {
     customers: state.customers ? state.customers : [],
     products: state.products ? state.products : [],
     invoiceId: state.invoiceId ? state.invoiceId : null,
+    customerId: state.customerId ? state.customerId : null,
+    discount: state.discount ? state.discount : null,
   }
 }
 

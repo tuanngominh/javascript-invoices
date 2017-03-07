@@ -18,6 +18,7 @@ ReactDOM.render(
       <Route path='/' component={App}>
         <IndexRoute component={InvoiceList} />
         <Route path='/create-invoice' component={InvoiceForm} />
+        <Route path='/invoices/:invoiceId' component={InvoiceForm} />
       </Route>
     </Router>
   </Provider>

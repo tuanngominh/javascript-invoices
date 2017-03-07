@@ -34,6 +34,24 @@ const actionSuccess = (actionType, object) => {
   }, object)
 }
 
+export const fetchInvoice = (invoiceId) => {
+  return function(dispatch) {
+    dispatch(actionStart(types.INVOICE_FETCH))
+
+    let data = new FormData()
+    fetch(serverUrl + 'invoices' + '/' + invoiceId)
+    .then(function(response) {
+      return response.json()
+    })
+    .then((json) => {
+      dispatch(actionSuccess(types.INVOICE_FETCH, {payload: json}))
+    })
+    .catch(function(err) {
+      dispatch(actionFailed(types.INVOICE_FETCH))
+    })
+  }
+}
+
 export const createCustomer = (customerName) => {
   return function(dispatch) {
     dispatch(actionStart(types.CUSTOMERS_CREATE))
@@ -62,16 +80,16 @@ export const createCustomer = (customerName) => {
 }
 
 export const saveInvoice = (invoice) => {
+  console.log(invoice)
   return function(dispatch) {
-    dispatch(actionStart(types.SAVE_INVOICE))
+    dispatch(actionStart(types.INVOICE_SAVE))
 
     let url, method, body
     if (invoice.invoiceId) {
       url = serverUrl + 'invoices' + '/' + invoice.invoiceId
       method = 'put'
-      if (invoice.customer)
       body = Object.assign({}, {
-        customer_id: parseInt(invoice.customer),
+        customer_id: parseInt(invoice.customerId),
         discount: parseInt(invoice.discount)
       })
       body = JSON.stringify(body)
@@ -91,10 +109,10 @@ export const saveInvoice = (invoice) => {
       return response.json()
     })
     .then((json) => {
-      dispatch(actionSuccess(types.SAVE_INVOICE, {payload: json.id}))
+      dispatch(actionSuccess(types.INVOICE_SAVE, {payload: json.id}))
     })
     .catch(function(err) {
-      dispatch(actionFailed(types.SAVE_INVOICE))
+      dispatch(actionFailed(types.INVOICE_SAVE))
     })
   }
 }
@@ -136,17 +154,17 @@ export const fetchProducts = () => {
 
 export const fetchInvoices = () => {
   return function(dispatch) {
-    dispatch(actionStart(types.INVOICES_FETCH_LIST))
+    dispatch(actionStart(types.INVOICE_FETCH_LIST))
 
     fetch(serverUrl + 'invoices')
     .then(function(response) {
       return response.json()
     })
     .then((json) => {
-      dispatch(actionSuccess(types.INVOICES_FETCH_LIST, {payload: json}))
+      dispatch(actionSuccess(types.INVOICE_FETCH_LIST, {payload: json}))
     })
     .catch(function(err) {
-      dispatch(actionFailed(types.INVOICES_FETCH_LIST))
+      dispatch(actionFailed(types.INVOICE_FETCH_LIST))
     })
   }
 }
