@@ -5,6 +5,7 @@ const invoices = (state = {}, action) => {
     case types.INVOICES_FETCH_LIST:
       if (action.isFetching && action.isFetching === true) {
         return {
+          ...state,
           invoices: [],
           isFetching: true
         }
@@ -12,12 +13,70 @@ const invoices = (state = {}, action) => {
 
       if (action.status && action.status === 'success') {
         return { 
+          ...state,
           invoices: action.payload,
           isFetching: false
         }
       }
 
       return state
+
+    case types.CUSTOMERS_FETCH:
+      if (action.isFetching && action.isFetching === true) {
+        return {
+          ...state,
+          customers: [],
+          isFetching: true
+        }
+      }
+
+      if (action.status && action.status === 'success') {
+        return { 
+          ...state,
+          customers: action.payload,
+          isFetching: false
+        }
+      }
+
+      return state
+
+
+    case types.PRODUCTS_FETCH:
+      if (action.isFetching && action.isFetching === true) {
+        return {
+          ...state,
+          products: [],
+          isFetching: true
+        }
+      }
+
+      if (action.status && action.status === 'success') {
+        return { 
+          ...state,
+          products: action.payload,
+          isFetching: false
+        }
+      }
+
+      return state      
+
+    case types.SAVE_INVOICE:
+      if (action.isFetching && action.isFetching === true) {
+        return {
+          ...state,
+          isFetching: true
+        }
+      }
+
+      if (action.status && action.status === 'success') {
+        return { 
+          ...state,
+          invoiceId: action.payload,
+          isFetching: false
+        }
+      }
+
+      return state 
 
     default :
       return state

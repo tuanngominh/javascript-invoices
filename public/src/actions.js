@@ -2,7 +2,8 @@ import * as types from './ActionTypes'
 
 const serverUrl = 'http://localhost:8000/api/'
 
-export const actionFailed = (actionType, errorMessage, object) => {
+
+const actionFailed = (actionType, errorMessage, object) => {
   let action = {
     type: actionType,
     status: 'error',
@@ -18,14 +19,14 @@ export const actionFailed = (actionType, errorMessage, object) => {
   return action
 }
 
-export const actionStart = (actionType, object) => {
+const actionStart = (actionType, object) => {
   return Object.assign({
     type: actionType,
     isFetching: true
   }, object)
 }
 
-export const actionSuccess = (actionType, object) => {
+const actionSuccess = (actionType, object) => {
   return Object.assign({
     type: actionType,
     status: 'success',
@@ -33,7 +34,77 @@ export const actionSuccess = (actionType, object) => {
   }, object)
 }
 
-export const fetchInvoices = (uid) => {
+export const saveInvoice = (invoice) => {
+  return function(dispatch) {
+    dispatch(actionStart(types.SAVE_INVOICE))
+
+    let url, method, body
+    if (invoice.invoiceId) {
+      url = serverUrl + 'invoices' + '/' + invoice.invoiceId
+      method = 'put'
+      if (invoice.customer)
+      body = Object.assign({}, {
+        customer_id: parseInt(invoice.customer),
+        discount: parseInt(invoice.discount)
+      })
+      body = JSON.stringify(body)
+    } else {
+      url = serverUrl + 'invoices'
+      method = 'post'
+      body = {}
+    }
+    fetch(url, {
+      method,
+      body
+    })
+    .then(function(response) {
+      return response.json()
+    })
+    .then((json) => {
+      dispatch(actionSuccess(types.SAVE_INVOICE, {payload: json.id}))
+    })
+    .catch(function(err) {
+      dispatch(actionFailed(types.SAVE_INVOICE))
+    })
+  }
+}
+
+export const fetchCustomers = () => {
+  return function(dispatch) {
+    dispatch(actionStart(types.CUSTOMERS_FETCH))
+
+    fetch(serverUrl + 'customers')
+    .then(function(response) {
+      return response.json()
+    })
+    .then((json) => {
+      dispatch(actionSuccess(types.CUSTOMERS_FETCH, {payload: json}))
+    })
+    .catch(function(err) {
+      dispatch(actionFailed(types.CUSTOMERS_FETCH))
+    })
+  }
+}
+
+export const fetchProducts = () => {
+  return function(dispatch) {
+    dispatch(actionStart(types.PRODUCTS_FETCH))
+
+    fetch(serverUrl + 'products')
+    .then(function(response) {
+      return response.json()
+    })
+    .then((json) => {
+      dispatch(actionSuccess(types.PRODUCTS_FETCH, {payload: json}))
+    })
+    .catch(function(err) {
+      dispatch(actionFailed(types.PRODUCTS_FETCH))
+    })
+  }
+}
+
+
+export const fetchInvoices = () => {
   return function(dispatch) {
     dispatch(actionStart(types.INVOICES_FETCH_LIST))
 
