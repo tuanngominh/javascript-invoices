@@ -156,7 +156,7 @@ class InvoiceForm extends Component {
             <div className="col-sm-2"><a className="btn btn-secondary" onClick={this.toggleAddCustomer} >Add</a></div>
           </div>
           {this.state.showAddCustomer && <div className="form-group"><div className="col-sm-8 col-sm-offset-2">
-              <CustomerForm onSave={this.handleCreateCustomer}/>
+              <CustomerForm onSave={this.handleCreateCustomer} onCancel={() => this.setState({showAddCustomer: false})}/>
             </div></div>
           }
           <div className="form-group">

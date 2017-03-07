@@ -27,7 +27,8 @@ class CustomerForm extends Component {
               <input className="form-control" placeholder="Customer name" value={this.state.value} onChange={this.handleChange}/>
             </div>
             <div className="col-sm-6">
-              <button type="submit" className="btn btn-default" onClick={this.handleSave}>Create</button>
+              <button type="submit" className="btn btn-primary" onClick={this.handleSave}>Create</button>
+              <a type="submit" className="btn btn-link" onClick={this.props.onCancel}>Cancel</a>
             </div>
           </div>
         </div>
