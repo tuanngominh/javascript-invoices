@@ -189,12 +189,7 @@ class InvoiceForm extends Component {
             <div className="col-sm-10">
               <p className="form-control-static">{this.state.total}</p>
             </div>
-          </div>          
-          <div className="form-group">
-            <div className="col-sm-12">
-              <a className="btn btn-primary" onClick={this.handleSave}>Submit</a>
-            </div>
-          </div>          
+          </div>       
         </form>        
       </div>
     )
