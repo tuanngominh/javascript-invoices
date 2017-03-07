@@ -37,9 +37,14 @@ export const fetchInvoices = (uid) => {
   return function(dispatch) {
     dispatch(actionStart(types.INVOICES_FETCH_LIST))
 
-    fetch(serverUrl + 'invoices').then(function(response) {
-      dispatch(actionSuccess(types.INVOICES_FETCH_LIST, {payload: response}))
-    }).catch(function(err) {
+    fetch(serverUrl + 'invoices')
+    .then(function(response) {
+      return response.json()
+    })
+    .then((json) => {
+      dispatch(actionSuccess(types.INVOICES_FETCH_LIST, {payload: json}))
+    })
+    .catch(function(err) {
       dispatch(actionFailed(types.INVOICES_FETCH_LIST))
     })
   }

@@ -19,11 +19,10 @@ export class InvoiceList extends Component {
           <tbody>
             {(this.props.invoices.length === 0) &&
               <tr>
-                <td colspan={2}>No invoices</td>
+                <td colSpan={2}>No invoices</td>
               </tr>  
             }
-            {
-              this.props.invoices.map((invoice) => (
+            { this.props.invoices.map((invoice) => (
                 <tr key={invoice.id}>
                   <th>{invoice.id}</th><td>{invoice.id}</td>
                 </tr>
