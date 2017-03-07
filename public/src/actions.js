@@ -34,17 +34,63 @@ const actionSuccess = (actionType, object) => {
   }, object)
 }
 
+export const fetchInvoiceItems = (invoiceId) => {
+  return function(dispatch) {
+    dispatch(actionStart(types.INVOICE_ITEM_FETCH_LIST))
+
+    let data = new FormData()
+    fetch(serverUrl + 'invoices' + '/' + invoiceId + '/items')
+    .then(function(response) {
+      return response.json()
+    })
+    .then((json) => {      
+      dispatch(actionSuccess(types.INVOICE_ITEM_FETCH_LIST, {payload: json}))
+    })
+    .catch(function(err) {
+      dispatch(actionFailed(types.INVOICE_ITEM_FETCH_LIST))
+    })
+  }
+}
+
+export const createInvoiceItem = (invoiceId, productId) => {
+  return function(dispatch) {
+    dispatch(actionStart(types.INVOICE_ITEM_CREATE))
+
+    let data = new FormData()
+    fetch(serverUrl + 'invoices' + '/' + invoiceId + '/items',{
+      method: 'post',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        product_id: parseInt(productId),
+        quantity: 0
+      })
+    })
+    .then(function(response) {
+      return response.json()
+    })
+    .then((json) => {
+      dispatch(actionSuccess(types.INVOICE_ITEM_CREATE, {payload: json}))
+      dispatch(fetchInvoiceItems(invoiceId))
+    })
+    .catch(function(err) {
+      dispatch(actionFailed(types.INVOICE_ITEM_CREATE))
+    })
+  }
+}
+
 export const fetchInvoice = (invoiceId) => {
   return function(dispatch) {
     dispatch(actionStart(types.INVOICE_FETCH))
 
-    let data = new FormData()
     fetch(serverUrl + 'invoices' + '/' + invoiceId)
     .then(function(response) {
       return response.json()
     })
     .then((json) => {
       dispatch(actionSuccess(types.INVOICE_FETCH, {payload: json}))
+      dispatch(fetchInvoiceItems(invoiceId))
     })
     .catch(function(err) {
       dispatch(actionFailed(types.INVOICE_FETCH))
@@ -56,7 +102,6 @@ export const createCustomer = (customerName) => {
   return function(dispatch) {
     dispatch(actionStart(types.CUSTOMERS_CREATE))
 
-    let data = new FormData()
     fetch(serverUrl + 'customers', {
       method: 'post', 
       headers: {
@@ -80,7 +125,6 @@ export const createCustomer = (customerName) => {
 }
 
 export const saveInvoice = (invoice) => {
-  console.log(invoice)
   return function(dispatch) {
     dispatch(actionStart(types.INVOICE_SAVE))
 

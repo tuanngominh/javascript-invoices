@@ -96,7 +96,25 @@ const invoices = (state = {}, action) => {
         }
       }
 
-      return state       
+      return state
+
+    case types.INVOICE_ITEM_FETCH_LIST:
+      if (action.isFetching && action.isFetching === true) {
+        return {
+          ...state,
+          isFetching: true
+        }
+      }
+
+      if (action.status && action.status === 'success') {        
+        return { 
+          ...state,
+          invoiceItems: action.payload,
+          isFetching: false
+        }
+      }
+
+      return state         
 
     default :
       return state

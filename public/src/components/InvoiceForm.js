@@ -1,13 +1,13 @@
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
-import {fetchCustomers, fetchProducts, saveInvoice, createCustomer, fetchInvoice} from '../actions'
+import {fetchCustomers, fetchProducts, saveInvoice, createCustomer, fetchInvoice, createInvoiceItem} from '../actions'
 import CustomerForm from './CustomerForm'
 
 class InvoiceItem extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      value: '',
+      value: props.quantity ? props.quantity : 0,
     }
   }
   handleChange = (e) => {
@@ -17,6 +17,13 @@ class InvoiceItem extends Component {
       value
     })
     this.props.onChange(this.props.id, value)
+  }
+  componentWillReceiveProps(nextProps) {
+    if ('quantity' in nextProps) {
+      this.setState({
+        value: nextProps.quantity
+      })
+    }
   }
   render() {
     return (
@@ -30,14 +37,15 @@ class InvoiceItem extends Component {
     )
   }
 }
+
 class InvoiceForm extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      customer: '',
-      invoiceItems: [],
+      invoiceId: '',
       discount: 0,
       customerId: props.customerId ? props.customerId : '',
+      invoiceItems: [],      
       total: 0,
       showAddCustomer: false
     }
@@ -53,6 +61,9 @@ class InvoiceForm extends Component {
       invoiceId = this.props.invoiceId
     }
     if (invoiceId) {
+      this.setState({
+        invoiceId: invoiceId
+      })
       this.props.onFetchInvoice(invoiceId)
     } else {
       this.handleSaveInvoice()  
@@ -70,11 +81,34 @@ class InvoiceForm extends Component {
         discount: nextProps.discount
       })
     }
+    if ('invoiceItems' in nextProps) {
+      //find invoice items which 
+      let newInvoiceItems = []
+      nextProps.invoiceItems.forEach((item) => {
+        const foundProducts = this.props.products.filter((p) => {
+          return (parseInt(p.id) === parseInt(item.product_id))
+        })
+        if (foundProducts.length === 0) {
+          return
+        }
+        const product = foundProducts[0]
+        let newInvoiceItem = {
+          invoiceId: item.invoice_id,
+          productId: product.id,
+          productName: product.name,
+          productPrice: product.price,
+          id: item.id,
+          quantity: item.quantity
+        }
+        newInvoiceItems.push(newInvoiceItem)
+      })
+      this.setState({invoiceItems: newInvoiceItems})
+    }
   }
   
   handleSaveInvoice = (data) => {
     this.props.onSaveInvoice(Object.assign({
-      invoiceId: this.props.invoiceId,
+      invoiceId: this.state.invoiceId,
       discount: this.state.discount,
       customerId: this.state.customerId
     }, data))
@@ -93,14 +127,32 @@ class InvoiceForm extends Component {
   handleSelectProduct = (e) => {
     e.preventDefault()
     const productId = e.target.value
-    let product = this.props.products.filter((p) => {
+
+    let product = this.state.invoiceItems.filter((p) => {
       return (p.id === parseInt(productId))
     })
+    //already added
+    if (product.length > 0) {
+      return
+    }
+
+    product = this.props.products.filter((p) => {
+      return (p.id === parseInt(productId))
+    })
+    //product not exist, pretty strict check here
+    if (product.length === 0) {
+      return
+    }
+
     product = product[0]
+    this.props.onCreateInvoiceItem(this.state.invoiceId, product.id)
+
     this.setState((prevState) => {
       return {
         invoiceItems: [...prevState.invoiceItems, {
-          product: Object.assign({}, product)
+          productName: product.name,
+          productPrice: product.price,
+          quantity: 0
         }]
       }
     })
@@ -129,8 +181,8 @@ class InvoiceForm extends Component {
       const products = prevState.invoiceItems.map((invoiceItem) => {
         let item = Object.assign({}, invoiceItem)
 
-        if (item.product.id === parseInt(id)) {
-          item.product.quantity = parseInt(quantity)
+        if (item.productId === parseInt(id)) {
+          item.quantity = parseInt(quantity)
         }
         return item
       })
@@ -212,10 +264,13 @@ class InvoiceForm extends Component {
                   }
                   { this.state.invoiceItems.map((invoiceItem) => (
                       <InvoiceItem 
-                        key={invoiceItem.product.id}
-                        id={invoiceItem.product.id}
-                        name={invoiceItem.product.name}
-                        price={invoiceItem.product.price}
+                        key={invoiceItem.id}
+                        id={invoiceItem.id}
+                        invoiceId={invoiceItem.invoiceId}
+                        productId={invoiceItem.productId}
+                        quantity={invoiceItem.quantity}
+                        name={invoiceItem.productName}
+                        price={invoiceItem.productPrice}
                         onChange={this.handleChangeInvoiceItemQuantity}
                       />
                     ))
@@ -258,6 +313,9 @@ const mapDispatchToProps = (dispatch) => {
     },
     onFetchInvoice: (invoiceId) => {
       dispatch(fetchInvoice(invoiceId))
+    },
+    onCreateInvoiceItem: (invoiceId, productId) => {
+      dispatch(createInvoiceItem(invoiceId, productId))
     }
   }
 }
@@ -267,8 +325,9 @@ const mapStateToProps = (state) => {
     customers: state.customers ? state.customers : [],
     products: state.products ? state.products : [],
     invoiceId: state.invoiceId ? state.invoiceId : null,
-    customerId: state.customerId ? state.customerId : null,
-    discount: state.discount ? state.discount : null,
+    customerId: state.customerId ? state.customerId : '',
+    discount: state.discount ? state.discount : '',
+    invoiceItems: state.invoiceItems ? state.invoiceItems : []
   }
 }
 
