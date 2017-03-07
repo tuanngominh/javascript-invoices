@@ -34,6 +34,33 @@ const actionSuccess = (actionType, object) => {
   }, object)
 }
 
+export const createCustomer = (customerName) => {
+  return function(dispatch) {
+    dispatch(actionStart(types.CUSTOMERS_CREATE))
+
+    let data = new FormData()
+    fetch(serverUrl + 'customers', {
+      method: 'post', 
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        name: customerName
+      })
+    })
+    .then(function(response) {
+      return response.json()
+    })
+    .then((json) => {
+      dispatch(actionSuccess(types.CUSTOMERS_CREATE, {payload: json}))
+      dispatch(fetchCustomers())
+    })
+    .catch(function(err) {
+      dispatch(actionFailed(types.CUSTOMERS_CREATE))
+    })
+  }
+}
+
 export const saveInvoice = (invoice) => {
   return function(dispatch) {
     dispatch(actionStart(types.SAVE_INVOICE))
@@ -54,6 +81,9 @@ export const saveInvoice = (invoice) => {
       body = {}
     }
     fetch(url, {
+      headers: {
+        'Content-Type': 'application/json'
+      },
       method,
       body
     })

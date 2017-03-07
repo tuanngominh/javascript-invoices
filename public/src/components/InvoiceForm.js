@@ -1,6 +1,7 @@
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
-import {fetchCustomers, fetchProducts, saveInvoice} from '../actions'
+import {fetchCustomers, fetchProducts, saveInvoice, createCustomer} from '../actions'
+import CustomerForm from './CustomerForm'
 
 class InvoiceItem extends Component {
   constructor (props) {
@@ -36,7 +37,8 @@ class InvoiceForm extends Component {
       customer: '',
       invoiceItems: [],
       discount: 0,
-      total: 0
+      total: 0,
+      showAddCustomer: false
     }
   }
 
@@ -124,6 +126,19 @@ class InvoiceForm extends Component {
     this.handleSaveInvoice()
   }
 
+  toggleAddCustomer = () => {
+    this.setState({
+      showAddCustomer: !this.state.showAddCustomer
+    })
+  }
+
+  handleCreateCustomer = (customerName) => {
+    this.props.onCreateCustomer(customerName)
+    this.setState({
+      showAddCustomer: false
+    })
+  }
+
   render() {
     return (
       <div>
@@ -131,14 +146,19 @@ class InvoiceForm extends Component {
         <form className="form-horizontal">
           <div className="form-group">
             <label className="col-sm-2 control-label">Customer</label>
-            <div className="col-sm-10">
+            <div className="col-sm-8">
               <select className="form-control" value={this.state.customer} onChange={this.handleChangeCustomer}>
                 {this.props.customers.map((customer) => (
                   <option key={customer.id} value={customer.id}>{customer.name}</option>
                 ))}
-              </select>
+              </select>              
             </div>
+            <div className="col-sm-2"><a className="btn btn-secondary" onClick={this.toggleAddCustomer} >Add</a></div>
           </div>
+          {this.state.showAddCustomer && <div className="form-group"><div className="col-sm-8 col-sm-offset-2">
+              <CustomerForm onSave={this.handleCreateCustomer}/>
+            </div></div>
+          }
           <div className="form-group">
             <label className="col-sm-2 control-label">Select product</label>
             <div className="col-sm-10">
@@ -206,6 +226,9 @@ const mapDispatchToProps = (dispatch) => {
     },
     onSaveInvoice: (invoice) => {
       dispatch(saveInvoice(invoice))
+    },
+    onCreateCustomer: (customerName) => {
+      dispatch(createCustomer(customerName))
     }
   }
 }
