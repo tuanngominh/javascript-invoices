@@ -158,14 +158,14 @@ class InvoiceForm extends Component {
     })
   }
 
-  total = (products, discount) => {
-    if (!products) {
+  total = (invoiceItems, discount) => {
+    if (!invoiceItems) {
       return 0
     }
 
-    let total = products.reduce((acc, item) => {
-      if (item.product.quantity) {
-        return acc + item.product.quantity * item.product.price
+    let total = invoiceItems.reduce((acc, item) => {
+      if (item.quantity) {
+        return acc + item.quantity * item.productPrice
       }
       return acc
     }, 0)
@@ -178,18 +178,18 @@ class InvoiceForm extends Component {
 
   handleChangeInvoiceItemQuantity = (id, quantity) => {
     this.setState((prevState) => {
-      const products = prevState.invoiceItems.map((invoiceItem) => {
+      const invoiceItems = prevState.invoiceItems.map((invoiceItem) => {
         let item = Object.assign({}, invoiceItem)
 
-        if (item.productId === parseInt(id)) {
+        if (item.id === parseInt(id)) {
           item.quantity = parseInt(quantity)
         }
         return item
       })
 
       return {
-        products,
-        total: this.total(products, prevState.discount)
+        invoiceItems,
+        total: this.total(invoiceItems, prevState.discount)
       }
     })
   }
@@ -199,7 +199,7 @@ class InvoiceForm extends Component {
     const discount = e.target.value
     this.setState({
       discount,
-      total: this.total(this.state.products, discount)
+      total: this.total(this.state.invoiceItems, discount)
     })
     this.handleSaveInvoice({discount})
   }
